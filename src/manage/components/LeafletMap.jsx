@@ -10,6 +10,8 @@ import {
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import debounceValue from '../../common/hooks/debounceValue'
+
 import rawCoord from '../mockData/coord-data.json';
 import { lineStyles, mapSources, zoom as initialZoom } from '../../common/constants/map';
 import { getParkingSpots } from '../utils/spaceGeneration';
@@ -45,17 +47,21 @@ const mapLayerKeys = ['esriWorldImagery', 'Stamen_TonerLabels'];
 export default () => {
   const dispatch = useDispatch();
   const [places, setPlaces] = useState([]);
-  const [zoom, setZoom] = useState(initialZoom)
-  const [center, setCenter] = useState([defaultLatLng[0], defaultLatLng[1]]);
+  const [viewport, setViewport] =  useState({
+    center: [defaultLatLng[0], defaultLatLng[1]],
+    zoom: initialZoom
+  })
+
+  const debouncedViewport = debounceValue(viewport, 800)
 
   useEffect(() => {
-    if (zoom < 20 ) {
-      const location = new google.maps.LatLng(center[0], center[1]) // eslint-disable-line no-undef
+    if (viewport.zoom < 20 ) {
+      const location = new google.maps.LatLng(debouncedViewport.center[0], debouncedViewport.center[1]) // eslint-disable-line no-undef
       const service = new google.maps.places.PlacesService(document.createElement('div'));  // eslint-disable-line no-undef
 
       const request = {
         location,
-        radius: getZoomRadii(zoom),
+        radius: getZoomRadii(viewport.zoom),
         type: ['establishment']
       }
 
@@ -67,7 +73,7 @@ export default () => {
         console.log("Error Searching For Nearby Places")
       });
     }
-  }, [center, zoom]);
+  }, [debouncedViewport]);
 
 
   const handleMouseMove = ({ latlng }) => {
@@ -82,15 +88,14 @@ export default () => {
     }
   };
   const handleViewportChanged = ({ center, zoom }) => {
-    setCenter(center)
-    setZoom(zoom)
+    setViewport({center, zoom})
   }
 
   return (
     <StyledMap
       id="mapId"
       center={defaultLatLng}
-      zoom={zoom}
+      zoom={viewport.zoom}
       zoomControl={false}
       onViewportChanged={handleViewportChanged}
       onClick={handleMapClick}

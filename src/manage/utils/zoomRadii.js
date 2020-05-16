@@ -1,6 +1,6 @@
 export const getZoomRadii = (zoomLevel) => {
   const zoomToMetersMap = {
-    19: 100,
+    19: 150,
     18: 230,
     17: 300,
     16: 900,
