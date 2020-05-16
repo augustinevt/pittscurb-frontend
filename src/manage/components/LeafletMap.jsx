@@ -39,7 +39,7 @@ const StyledMap = styled(Map)`
 
   & .leaflet-tile-pane {
     filter: grayscale(1) contrast(.5) brightness(1.2);
-  }
+  }add
 `;
 
 const mapLayerKeys = ['esriWorldImagery', 'Stamen_TonerLabels'];
@@ -52,16 +52,18 @@ export default () => {
     zoom: initialZoom
   })
 
-  const debouncedViewport = debounceValue(viewport, 800)
+  const debouncedViewport = debounceValue(viewport, 1000)
 
   useEffect(() => {
-    if (viewport.zoom < 20 ) {
-      const location = new google.maps.LatLng(debouncedViewport.center[0], debouncedViewport.center[1]) // eslint-disable-line no-undef
+    const {zoom, center} = debouncedViewport
+
+    if (zoom < 20 ) {
+      const location = new google.maps.LatLng(center[0], center[1]) // eslint-disable-line no-undef
       const service = new google.maps.places.PlacesService(document.createElement('div'));  // eslint-disable-line no-undef
 
       const request = {
         location,
-        radius: getZoomRadii(viewport.zoom),
+        radius: getZoomRadii(zoom),
         type: ['establishment']
       }
 
